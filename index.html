@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+    <style type="text/css">
+        body,ul,li{
+            margin: 0;
+            padding: 0;
+        }
+        ul,li{
+            list-style: none;
+        }
+        ul{
+            position: relative;
+            width: 480px;
+            height: 640px;
+            margin: 150px auto;
+            background: #CDE074;
+        }
+        ul li{
+           float: left;
+            width: 150px;
+            height: 150px;
+            margin: 5px;
+            overflow: hidden;
+            background: #FF9900;
+        }
+        ul li img{
+            width: 150px;
+            height: 150px;
+            overflow: hidden;
+            border: none;
+            /*background: #0044DD;*/
+        }
+    </style>
+</head>
+<body>
+<ul>
+    <li><img src="img/1.jpg" alt=""/></li>
+    <li><img src="img/2.jpg" alt=""/></li>
+    <li><img src="img/3.jpg" alt=""/></li>
+    <li><img src="img/4.jpg" alt=""/></li>
+    <li><img src="img/5.jpg" alt=""/></li>
+    <li><img src="img/6.jpg" alt=""/></li>
+    <li><img src="img/7.jpg" alt=""/></li>
+    <li><img src="img/8.jpg" alt=""/></li>
+    <li><img src="img/9.jpg" alt=""/></li>
+    <li><img src="img/10.jpg" alt=""/></li>
+    <li><img src="img/11.jpg" alt=""/></li>
+    <li><img src="img/12.jpg" alt=""/></li>
+</ul>
+
+<script src="myEvent.js"></script>
+<script src="oop-drag.js"></script>
+<script src="tween.js"></script>
+<script type="text/javascript">
+//1. 把浮动布局转变成绝对定位的布局
+    var oLis=document.getElementsByTagName("li");
+    for(var i=oLis.length-1;i>=0;i--){
+        var oLi=oLis.item(i);
+        oLi.l=oLi.offsetLeft;
+        oLi.t=oLi.offsetTop;
+        oLi.style.left=oLi.l+"px";
+        oLi.style.top=oLi.t+"px";
+        oLi.style.position="absolute";
+        oLi.style.margin=0;
+
+//        on(oLi,"mousedown",down);
+//        on(oLi,"selfDragStart",increaseIndex);
+
+        var obj=new Drag(oLi);
+        obj.on("dragStart",increaseIndex);
+//        obj.on("dragEnd",goBack);
+        obj.on("dragging",hitedTest);
+        obj.on("dragEnd",changePosition);
+        obj.border();
+    }
+    var zIndex=1;
+    function increaseIndex(){
+        this.ele.style.zIndex=++zIndex;
+    }
+    function goBack(){
+        animate(this.ele,{left:this.ele.l,top:this.ele.t},800,3)
+    }
+    //检测碰撞,当前被拖拽元素在其他元素的上下左右，没有进入到其他元素的时候，就是没有碰撞上，而我们需要把碰撞上了的都找不出来
+function test(r,b){
+    if(r.offsetLeft+r.offsetWidth<b.offsetLeft||r.offsetTop+r.offsetHeight<b.offsetTop||r.offsetLeft>b.offsetLeft+b.offsetWidth||r.offsetTop>b.offsetTop+b.offsetHeight){
+        return false;
+    }else{
+        return true;
+    }
+}
+    //循坏所有的li，找出保存所有碰撞到的li（不包括当前拖拽的li）
+    function hitedTest(){
+        this.hitedEle=[];//在自定义属性上建一个空数组来保存碰撞到的li
+        //oLis是全局变量，可以引进自己的DOM库，将oLis写成this.siblings
+        for(var i=0;i<oLis.length;i++){
+            var oLi=oLis[i];
+            oLi.style.opacity="";
+            if(this.ele==oLi)continue;
+            if(test(this.ele,oLi)){
+                oLi.style.opacity="0.6";
+                this.hitedEle.push(oLi);
+            }
+        }
+    }
+    //交换位置
+    function changePosition(){
+        var a=this.hitedEle;
+        if(a&& a.length){
+            for(var i=0;i< a.length;i++){
+                var oLi=a[i];
+                oLi.style.opacity="";
+                var x=this.ele.offsetLeft-oLi.offsetLeft;
+                var y=this.ele.offsetTop-oLi.offsetTop;
+                oLi.distance=x*x+y*y;
+            }
+            a.sort(function(a,b){return a.distance- b.distance});
+            //a[0]和this.ele交换位置
+            animate(a[0],{left:this.ele.l,top:this.ele.t},600,4);
+            animate(this.ele,{left:a[0].l,top:a[0].t},600,4);
+            var templ=this.ele.l;
+            var tempt=this.ele.t;
+            this.ele.l=a[0].l;
+            this.ele.t=a[0].t;
+            a[0].l=templ;
+            a[0].t=tempt;
+            this.hitedEle=null;
+        }else{
+            animate(this.ele,{left:this.ele.l,top:this.ele.t},800,3);
+            oLi.style.opacity="";
+        }
+    }
+
+
+
+</script>
+</body>
+</html>

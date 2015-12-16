@@ -1,5 +1,5 @@
 /**
- * Created by catawy on 2015/9/9.
+ * Created by cataway on 2015/9/9.
  */
 
 function on(ele,type,fn){

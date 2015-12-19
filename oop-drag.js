@@ -36,8 +36,8 @@ EventEmitter.prototype.off=function(type,fn){
 
 
 
-function Drag(ele){//ʵ��ʶ��ͳ�ʼ��ʵ��������
-    this.ele=ele;//this��ָ��ǰʵ����һ��Ҫ��ʶ��ʵ��������
+function Drag(ele){ //实例识别和初始化实例的作用
+    this.ele=ele; //this是指当前实例
     this.x=null;
     this.y=null;
     this.mx=null;
@@ -45,9 +45,9 @@ function Drag(ele){//ʵ��ʶ��ͳ�ʼ��ʵ��������
     this.DOWN=processThis(this,this.down);
     this.MOVE=processThis(this,this.move);
     this.UP=processThis(this,this.up);
-    //this.DOWN��˽�еģ�this.down�ǹ����
+    //this.DOWN是私有的，this.down是共享的
     on(this.ele,"mousedown",this.DOWN);
-    //�������ı�̵�һЩԭ�����ϵķ������thisָ��ǰʵ��
+    //面向对象的编程的一些原则：类上的方法里的this指向当前实例
 
 }
 Drag.prototype=new EventEmitter;
@@ -66,7 +66,7 @@ Drag.prototype.down=function(e){
     }
     e.preventDefault();
     this.run("dragStart",e);
-    //��ǰ�Ǹ�������ʵ��this����Զ����¼������Ǹ�DOM��������Զ��¼����ǾͲ�������Զ����¼���DOMϵͳ�¼���ͻ������
+    //当前是给这个类的实例this添加自定义事件，而非给DOM对象添加自定事件。那就不会存在自定义事件和DOM系统事件冲突的问题
 }
 Drag.prototype.move=function(e){
     this.ele.style.left=this.x+e.pageX-this.mx+"px";
@@ -84,10 +84,9 @@ Drag.prototype.up=function(e){
     }
 
     this.run("dragEnd",e);
-    //mouseup��dragEnd��û������
 }
 Drag.prototype.range=function(left,top,right,bottom){
-    //�Զ����¼���ԭ��ģʽ����
+    //自定义事件和原型模式相结合
     this.oRange={left:left,top:top,right:right,bottom:bottom}
     this.on("dragging",this.runRange);
 
